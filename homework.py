@@ -22,6 +22,11 @@ HOMEWORK_STATUSES = {
     'reviewing': 'Работа взята на проверку ревьюером.',
     'rejected': 'Работа проверена: у ревьюера есть замечания.',
 }
+logging.basicConfig(
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    level=logging.INFO,
+)
+logging.info('Сообщение отправлено')
 
 
 def send_message(bot, message):
@@ -64,13 +69,21 @@ def parse_status(homework):
 
 
 def check_tokens():
-    tokens = (PRACTICUM_TOKEN, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID)
+    tokens = {
+        'PRACTICUM_TOKEN': PRACTICUM_TOKEN,
+        'TELEGRAM_TOKEN': TELEGRAM_TOKEN,
+        'TELEGRAM_CHAT_ID': TELEGRAM_CHAT_ID,
+    }
     flag = 0
-    for token in tokens:
-        if token != '':
-            flag += 1
+    for token_name, token in tokens.items():
+        if not token:
+            logging.critical(
+                f'Отсутствует обязательная переменная окружения: {token_name}'
+            )
         else:
-            return False
+            flag += 1
+    if flag != len(tokens):
+        return False
     return True
 
 
@@ -79,7 +92,7 @@ def main():
 
     check_tokens()
 
-    bot = telegram.Bot(token=TELEGRAM_TOKEN)  # telegram.
+    bot = telegram.Bot(token=TELEGRAM_TOKEN)
     current_timestamp = 0  # int(time.time()) вернуть обратно
 
     work_response = get_api_answer(current_timestamp)
@@ -91,7 +104,7 @@ def main():
             work_status = parse_status(response)
             current_timestamp = 0
             time.sleep(RETRY_TIME)
-            # send_message(bot, work_status)  # это времянка
+
         except Exception as error:
             message = f'Сбой в работе программы: {error}'
             send_message(bot, message)

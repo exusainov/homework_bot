@@ -29,17 +29,19 @@ HOMEWORK_STATUSES = {
 
 
 def get_stream_handler() -> logging.Logger:
+    """Обработчик логов."""
     stream_handler = logging.StreamHandler(sys.stdout)
     stream_handler.setLevel(logging.INFO)
     stream_handler.setFormatter(
         logging.Formatter(
-            f"%(asctime)s - [%(levelname)s] - %(name)s - %(message)s"
+            '%(asctime)s, %(levelname)s, %(funcName)s, %(message)s'
         )
     )
     return stream_handler
 
 
 def get_logger() -> logging.Logger:
+    """Обработчик логов."""
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
     logger.addHandler(get_stream_handler())
@@ -133,7 +135,6 @@ def check_tokens():
 
 def main():
     """Основная логика работы бота."""
-
     logger.info("Программа стартует")
 
     bot = telegram.Bot(token=TELEGRAM_TOKEN)

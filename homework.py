@@ -27,17 +27,19 @@ HOMEWORK_STATUSES = {
     'rejected': 'Работа проверена: у ревьюера есть замечания.',
 }
 
-_log_format = f"%(asctime)s - [%(levelname)s] - %(name)s - %(message)s"
 
-
-def get_stream_handler():
+def get_stream_handler() -> logging.Logger:
     stream_handler = logging.StreamHandler(sys.stdout)
     stream_handler.setLevel(logging.INFO)
-    stream_handler.setFormatter(logging.Formatter(_log_format))
+    stream_handler.setFormatter(
+        logging.Formatter(
+            f"%(asctime)s - [%(levelname)s] - %(name)s - %(message)s"
+        )
+    )
     return stream_handler
 
 
-def get_logger():
+def get_logger() -> logging.Logger:
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
     logger.addHandler(get_stream_handler())
@@ -48,6 +50,7 @@ logger = get_logger()
 
 
 def send_message(bot, message):
+    """Отправляет сообщение."""
     try:
         logger.info('Сообщение отправлено')
         bot.send_message(TELEGRAM_CHAT_ID, message)
@@ -56,6 +59,7 @@ def send_message(bot, message):
 
 
 def get_api_answer(current_timestamp):
+    """Делает запрос к единственному эндпоинту."""
     timestamp = current_timestamp or int(time.time())
     logger.debug('Получение статуса')
     params = {'from_date': timestamp}
@@ -73,16 +77,7 @@ def get_api_answer(current_timestamp):
 
 
 def check_response(response):
-
-    # if not response:
-    #    logger.error(f'Отсутствует домашняя работа:')
-    #    return response
-
-    # if 'homeworks' not in response and 'current_date' not in response:
-    #    logger.error(f'Отсутствует обязательных ключей:')
-
-    # if type(response.get('homeworks')) != list:
-    #    logger.error(f'Домашняя работа не является списком:')
+    """Проверяем ответ API."""
     if len(response) == 0:
         logger.error('Нет ответа')
         raise ErrorResponse('Нет ответа')
@@ -103,6 +98,7 @@ def check_response(response):
 
 
 def parse_status(homework):
+    """Распаковка  ДЗ."""
     homework_name = homework['homework_name']
     homework_status = homework['status']
 
@@ -116,6 +112,7 @@ def parse_status(homework):
 
 
 def check_tokens():
+    """Проверяем доступность переменных окружения."""
     tokens = {
         'PRACTICUM_TOKEN': PRACTICUM_TOKEN,
         'TELEGRAM_TOKEN': TELEGRAM_TOKEN,

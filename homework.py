@@ -69,11 +69,10 @@ def get_api_answer(current_timestamp):
         homework_statuses = requests.get(
             ENDPOINT, headers=HEADERS, params=params
         )
-    except requests.exceptions.RequestException:
-        raise ErrorResponse('Нет ответа от сервера')
+    except requests.exceptions.RequestException as ex:
+        raise ErrorResponse('Нет ответа от сервера') from ex
     if homework_statuses.status_code != HTTPStatus.OK:
         status_code = homework_statuses.status_code
-        logger.error(f'Ошибка несоответсвие статуса работы {status_code}')
         raise ValueError(f'Ошибка несоответсвие статуса работы {status_code}')
 
     return homework_statuses.json()
@@ -81,13 +80,10 @@ def get_api_answer(current_timestamp):
 
 def check_response(response):
     """Проверяем ответ API."""
-    if not response:
-        logger.error('Нет ответа', exc_info=True)
-        raise ErrorResponse('Нет ответа')
     if not isinstance(response, dict):
         raise TypeError('Нет ответа в словаре')
     if 'homeworks' not in response:
-        raise KeyError('Отсуствует ключ')
+        raise KeyError('Отсуствует ключ homeworks')
 
     if not isinstance(response['homeworks'], list):
         raise TypeError("homework нет в списке")
@@ -121,20 +117,17 @@ def check_tokens():
         'TELEGRAM_TOKEN': TELEGRAM_TOKEN,
         'TELEGRAM_CHAT_ID': TELEGRAM_CHAT_ID,
     }
-    flag = 0
     empty_tokens = []
     for token_name, token in tokens.items():
         if not token:
             empty_tokens.append(token_name)
 
-        else:
-            flag += 1
-    if flag != len(tokens):
-        logger.critical(
-            f'Отсутствует обязательная переменная окружения: {empty_tokens}'
-        )
-        return False
-    return True
+    if not empty_tokens:
+        return True
+    logger.critical(
+        f'Отсутствует обязательная переменная окружения: {empty_tokens}'
+    )
+    return False
 
 
 def main():

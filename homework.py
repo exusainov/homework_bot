@@ -161,3 +161,4 @@ if __name__ == '__main__':
     if check_tokens():
         main()
     logger.critical('Отсутствует обязательная переменная окружения:')
+    sys.exit('Отсуствует токен')
